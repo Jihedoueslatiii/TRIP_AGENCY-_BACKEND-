@@ -1,8 +1,6 @@
 package com.example.offresvoyage.entities;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,31 +20,42 @@ import java.util.List;
 public class OffreVoyage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long idOffreVoyage;
-    String nomOffre;
-    @Lob  // For potentially long descriptions
-    String description;
-    String destination;
-    Integer duree;
-    BigDecimal prix;
-    //@JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate dateDepart;
-    //@JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate dateRetour;
-    @Enumerated(EnumType.STRING)
-    Transport transport;
-    @Enumerated(EnumType.STRING)
-    Hebergement hebergement;
+    private Long idOffreVoyage;
 
-    @OneToMany(mappedBy = "offreVoyage")
-    List<Image> images;
+    @Column(nullable = false)
+    private String nom;
 
-    Integer capacite;
-    Integer nombreInscrits;
+    @Column(nullable = false)
+    private String destination;
+
+    @Column(nullable = false)
+    private LocalDate dateDepart;
+
+    @Column(nullable = false)
+    private LocalDate dateFin;
+
+    @Column(nullable = false)
+    private Double prix;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
+
+    @Column(nullable = false)
+    private Transport transport;
+
+    @Column(nullable = false)
+    private Hebergement hebergement;
+
+    @Column(nullable = false)
+    private Integer capacite;
+
+    @Column(nullable = false)
+    private LocalDate dateLimiteReservation;
     @Enumerated(EnumType.STRING)
-    Statut statut; // Consider enum
-    //@JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate dateLimiteReservation;
-
+    Statut statut;
+    @ElementCollection
+    @CollectionTable(name = "offre_voyage_images", joinColumns = @JoinColumn(name = "offre_voyage_id"))
+    @Column(name = "image_url")
+    private List<String> imageUrls;
 
 }
