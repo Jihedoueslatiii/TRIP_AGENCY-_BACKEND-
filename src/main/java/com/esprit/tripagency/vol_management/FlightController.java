@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -60,4 +62,22 @@ public class FlightController {
         flightService.removeFlight(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Flight>> searchFlights(
+            @RequestParam String depart,
+            @RequestParam String arrivee) {
+        return ResponseEntity.ok(flightService.searchFlights(depart, arrivee));
+    }
+
+    @GetMapping("/by-date")
+    public ResponseEntity<List<Flight>> getFlightsByDate(@RequestParam LocalDate date) {
+        return ResponseEntity.ok(flightService.getFlightsByDate(date));
+    }
+    @GetMapping("/{id}/duration")
+    public ResponseEntity<String> getFlightDuration(@PathVariable Long id) {
+        Duration duration = flightService.calculateFlightDuration(id);
+        return ResponseEntity.ok("Flight duration: " + duration.toHours() + " hours " + (duration.toMinutesPart()) + " minutes");
+    }
+
+
 }
