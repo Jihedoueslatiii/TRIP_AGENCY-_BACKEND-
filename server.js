@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 // Add the reservation routes
-const reservationRoutes = require("./routes/reservation"); // Assuming the router is in `routes/reservation.js`
+const reservationRoutes = require("./routes/reservationRoutes");
 app.use("/api/reservations", reservationRoutes);
 
 // Start server
