@@ -2,7 +2,9 @@ package com.esprit.tripagency.vol_management;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 public interface IFlightService  {
 
@@ -20,4 +22,14 @@ public interface IFlightService  {
     public List<Flight> getFlightsByDate(LocalDate date);
 
     Duration calculateFlightDuration(Long flightId);
+
+    List<Flight> searchFlightsAdvanced(
+            String departureAirport,
+            String arrivalAirport,
+            LocalDate startDate,
+            LocalDate endDate,
+            String airline,
+            FlightStatus status);
+
+
 }

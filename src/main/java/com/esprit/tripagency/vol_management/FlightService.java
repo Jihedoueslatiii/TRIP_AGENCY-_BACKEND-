@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class FlightService implements IFlightService {
@@ -99,5 +102,25 @@ public class FlightService implements IFlightService {
 
         return Duration.between(flight.getHeureDepart(), flight.getHeureArrivee());
     }
+
+    @Override
+    public List<Flight> searchFlightsAdvanced(
+            String departureAirport,
+            String arrivalAirport,
+            LocalDate startDate,
+            LocalDate endDate,
+            String airline,
+            FlightStatus status) {
+
+        return flightRepository.searchFlightsAdvanced(
+                departureAirport,
+                arrivalAirport,
+                startDate,
+                endDate,
+                airline,
+                status
+        );
+    }
+
 
 }

@@ -1,15 +1,25 @@
 package com.esprit.tripagency.vol_management;
 
 
+import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -19,6 +29,15 @@ import java.util.List;
 public class FlightController {
 @Autowired
     private IFlightService flightService;
+
+
+
+    // PDF Endpoints
+
+
+    // Excel Endpoints
+
+
 
     @GetMapping
     public ResponseEntity<List<Flight>> getAllFlights() {
@@ -78,6 +97,29 @@ public class FlightController {
         Duration duration = flightService.calculateFlightDuration(id);
         return ResponseEntity.ok("Flight duration: " + duration.toHours() + " hours " + (duration.toMinutesPart()) + " minutes");
     }
+
+    @GetMapping("/advanced-search")
+    public ResponseEntity<List<Flight>> advancedSearch(
+            @RequestParam(required = false) String departureAirport,
+            @RequestParam(required = false) String arrivalAirport,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String airline,
+            @RequestParam(required = false) FlightStatus status) {
+
+        List<Flight> flights = flightService.searchFlightsAdvanced(
+                departureAirport,
+                arrivalAirport,
+                startDate,
+                endDate,
+                airline,
+                status
+        );
+        return ResponseEntity.ok(flights);
+    }
+
+
+
 
 
 }

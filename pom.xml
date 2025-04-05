@@ -68,6 +68,29 @@
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
             <version>4.2.1</version>
         </dependency>
+        <!-- For Excel/CSV handling -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <!-- For PDF generation -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf.tool</groupId>
+            <artifactId>xmlworker</artifactId>
+            <version>5.5.13.3</version>
+        </dependency>
 
     </dependencies>
 
