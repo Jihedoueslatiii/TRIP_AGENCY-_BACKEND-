@@ -8,17 +8,17 @@ import com.example.offresvoyage.entities.Transport;
 import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +32,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Tag(name = "Offres Voyages")
 @RestController
@@ -200,4 +203,47 @@ public class OffreVoyageController {
 
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
+
+
+    @GetMapping("/offres-voyage/search")
+    public Page<OffreVoyage> searchOffers(
+            @RequestParam(required = false) String destination,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String transport,
+            @RequestParam(required = false) String hebergement,
+            @RequestParam(required = false) LocalDate reservationDeadline,
+            Pageable pageable) {
+
+        return serviceOffreVoyage.searchOffers(destination, startDate, endDate, minPrice, maxPrice,
+                transport, hebergement, reservationDeadline, pageable);
+    }
+
+
+    @GetMapping("/download/pdf/search")
+    public ResponseEntity<byte[]> downloadSearchResultsPdf(@RequestParam(required = false) String destination,
+                                                           @RequestParam(required = false) LocalDate startDate,
+                                                           @RequestParam(required = false) LocalDate endDate,
+                                                           @RequestParam(required = false) Double minPrice,
+                                                           @RequestParam(required = false) Double maxPrice,
+                                                           @RequestParam(required = false) String transport,
+                                                           @RequestParam(required = false) String hebergement,
+                                                           @RequestParam(required = false) LocalDate reservationDeadline,
+                                                           Pageable pageable) throws DocumentException, IOException {
+        // Call the service to generate the PDF
+        byte[] pdfBytes = serviceOffreVoyage.generatePdfForSearchResults(destination, startDate, endDate, minPrice, maxPrice, transport, hebergement, reservationDeadline, pageable);
+
+        // Prepare the response headers for the PDF
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("search-offers-list.pdf").build());
+
+        // Return the PDF as a response
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+
+
 }

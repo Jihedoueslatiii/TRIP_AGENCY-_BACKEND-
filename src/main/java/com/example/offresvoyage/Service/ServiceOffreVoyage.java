@@ -19,6 +19,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.itextpdf.text.*;
 
@@ -26,6 +28,7 @@ import com.itextpdf.text.*;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -108,7 +111,7 @@ OffreVoyageRepository offreVoyageRepository;
         mailSender.send(message);
     }
 
-    
+
     public byte[] generatePDF(OffreVoyage offre) throws DocumentException, IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4);
@@ -145,6 +148,54 @@ OffreVoyageRepository offreVoyageRepository;
         // Add the table to the document
         document.add(table);
         document.add(Chunk.NEWLINE); // Add a newline for spacing
+
+        document.close();
+        return out.toByteArray();
+    }
+
+
+    public Page<OffreVoyage> searchOffers(String destination, LocalDate startDate, LocalDate endDate,
+                                          Double minPrice, Double maxPrice, String transport,
+                                          String hebergement, LocalDate reservationDeadline, Pageable pageable) {
+
+        return offreVoyageRepository.findAllByFilters(destination, startDate, endDate, minPrice, maxPrice,
+                transport, hebergement, reservationDeadline, pageable);
+    }
+
+
+    public byte[] generatePdfForSearchResults(String destination, LocalDate startDate, LocalDate endDate,
+                                              Double minPrice, Double maxPrice, String transport,
+                                              String hebergement, LocalDate reservationDeadline, Pageable pageable) throws DocumentException, IOException {
+        // Perform the search based on the criteria provided
+        Page<OffreVoyage> offresPage = searchOffers(destination, startDate, endDate, minPrice, maxPrice, transport, hebergement, reservationDeadline, pageable);
+        List<OffreVoyage> offres = offresPage.getContent(); // Get the content of the search results
+
+        // Generate a PDF document for the list of offers
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, out);
+        document.open();
+
+        // Define fonts for title and content
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLUE);
+        Font normalFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+        Font headerFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BaseColor.DARK_GRAY);
+
+        // Add the title
+        document.add(new Paragraph("Liste des Offres de Voyage", titleFont));
+        document.add(Chunk.NEWLINE); // Add a newline for spacing
+
+        // Loop through the offers and add them to the PDF
+        for (OffreVoyage offre : offres) {
+            document.add(new Paragraph("Offre de Voyage: " + offre.getNom(), headerFont));
+            document.add(new Paragraph("Destination: " + offre.getDestination(), normalFont));
+            document.add(new Paragraph("Prix: " + offre.getPrix() + " TND", normalFont));
+            document.add(new Paragraph("Dates: " + offre.getDateDepart() + " → " + offre.getDateFin(), normalFont));
+            document.add(new Paragraph("Transport: " + offre.getTransport(), normalFont));
+            document.add(new Paragraph("Hébergement: " + offre.getHebergement(), normalFont));
+            document.add(new Paragraph("Description: " + offre.getDescription(), normalFont));
+            document.add(Chunk.NEWLINE); // Add space between offers
+        }
 
         document.close();
         return out.toByteArray();
