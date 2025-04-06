@@ -5,6 +5,7 @@ import com.example.offresvoyage.entities.Hebergement;
 import com.example.offresvoyage.entities.OffreVoyage;
 import com.example.offresvoyage.entities.Statut;
 import com.example.offresvoyage.entities.Transport;
+import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
@@ -186,4 +187,17 @@ public class OffreVoyageController {
         }
     }
 
+
+    @GetMapping("/offres/{offre-id}/export-pdf")
+    public ResponseEntity<byte[]> exportOffreAsPDF(@PathVariable("offre-id") Long idOffreVoyage) throws DocumentException, IOException {
+        OffreVoyage offre = serviceOffreVoyage.getOffreVoyage(idOffreVoyage);
+
+        byte[] pdfBytes = serviceOffreVoyage.generatePDF(offre);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "offre_" + offre.getIdOffreVoyage() + ".pdf");
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
 }
