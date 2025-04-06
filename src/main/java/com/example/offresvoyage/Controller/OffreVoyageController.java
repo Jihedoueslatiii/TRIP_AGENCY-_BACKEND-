@@ -1,10 +1,8 @@
 package com.example.offresvoyage.Controller;
 
+import com.example.offresvoyage.Repository.OffreVoyageRepository;
 import com.example.offresvoyage.Service.IServiceOffreVoyage;
-import com.example.offresvoyage.entities.Hebergement;
-import com.example.offresvoyage.entities.OffreVoyage;
-import com.example.offresvoyage.entities.Statut;
-import com.example.offresvoyage.entities.Transport;
+import com.example.offresvoyage.entities.*;
 import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,9 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 public class OffreVoyageController {
 
     IServiceOffreVoyage serviceOffreVoyage;
+    OffreVoyageRepository offreVoyageRepository;
 
     @Operation(description = "récupérer toutes les offres de voyages de la base de données")
     @GetMapping("/getAllOffresVoyage")
@@ -245,5 +242,22 @@ public class OffreVoyageController {
     }
 
 
+    @GetMapping("/advanced")
+    public ResponseEntity<Map<String, Object>> getAdvancedStatistics() throws IOException {
+        // Calculate statistics
+        StatisticsDto stats = serviceOffreVoyage.getAdvancedStatistics();
 
+        // Get yearly revenue map for the last 5 years
+        Map<Integer, Double> yearlyRevenue = stats.getYearlyRevenue();
+
+        // Save the revenue trend chart locally as an image
+        serviceOffreVoyage.saveRevenueTrendChart(yearlyRevenue);
+
+        // Prepare response
+        Map<String, Object> response = new HashMap<>();
+        response.put("statistics", stats);
+        response.put("message", "Yearly revenue chart for the last 5 years saved as yearly_revenue_trend_last_5_years.png");
+
+        return ResponseEntity.ok(response);
+    }
 }

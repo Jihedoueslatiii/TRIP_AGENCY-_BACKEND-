@@ -1,6 +1,7 @@
 package com.example.offresvoyage.Service;
 
 import com.example.offresvoyage.entities.OffreVoyage;
+import com.example.offresvoyage.entities.StatisticsDto;
 import com.itextpdf.text.DocumentException;
 import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface IServiceOffreVoyage {
     OffreVoyage addOffreVoyage(OffreVoyage offreVoyage);
@@ -30,5 +32,9 @@ public interface IServiceOffreVoyage {
                                               Double minPrice, Double maxPrice, String transport,
                                               String hebergement, LocalDate reservationDeadline, Pageable pageable) throws DocumentException, IOException;
 
+    public StatisticsDto getAdvancedStatistics();
+
+    public Map<Integer, Double> calculateYearlyRevenueForLastFiveYears(List<OffreVoyage> allOffers);
+    public void saveRevenueTrendChart(Map<Integer, Double> yearlyRevenue) throws IOException;
 
 }

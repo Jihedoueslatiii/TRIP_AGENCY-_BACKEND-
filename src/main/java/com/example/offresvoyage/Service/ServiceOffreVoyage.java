@@ -2,10 +2,15 @@ package com.example.offresvoyage.Service;
 
 import com.example.offresvoyage.Repository.OffreVoyageRepository;
 import com.example.offresvoyage.entities.OffreVoyage;
+import com.example.offresvoyage.entities.StatisticsDto;
 import com.itextpdf.text.pdf.PdfPTable;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.MessagingException;
@@ -16,7 +21,10 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.pdf.PdfWriter;
+
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 import org.springframework.data.domain.Page;
@@ -27,9 +35,13 @@ import com.itextpdf.text.*;
 
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -201,5 +213,55 @@ OffreVoyageRepository offreVoyageRepository;
         return out.toByteArray();
     }
 
+    public StatisticsDto getAdvancedStatistics() {
+        List<OffreVoyage> allOffers = offreVoyageRepository.findAll();
 
+        // Calculate revenue for the last 5 years
+        Map<Integer, Double> yearlyRevenue = calculateYearlyRevenueForLastFiveYears(allOffers);
+
+        // Create a DTO to hold the statistics
+        StatisticsDto statistics = new StatisticsDto();
+        statistics.setYearlyRevenue(yearlyRevenue);
+
+        return statistics;
+    }
+
+    // Method to calculate revenue for each year, but only for the last 5 years
+    public Map<Integer, Double> calculateYearlyRevenueForLastFiveYears(List<OffreVoyage> allOffers) {
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        int startYear = currentYear - 5;
+
+        // Filter the offers to include only those from the last 5 years
+        List<OffreVoyage> recentOffers = allOffers.stream()
+                .filter(offer -> offer.getDateDepart().getYear() >= startYear)
+                .collect(Collectors.toList());
+
+        // Group by year and calculate revenue
+        return recentOffers.stream()
+                .collect(Collectors.groupingBy(
+                        offer -> offer.getDateDepart().getYear(), // Assuming `getDateCreation()` returns the year of the offer
+                        Collectors.summingDouble(offer -> offer.getPrix() * offer.getCapacite()) // Calculate revenue per offer
+                ));
+    }
+
+    // Save the revenue trend chart to a file on the local machine
+    public void saveRevenueTrendChart(Map<Integer, Double> yearlyRevenue) throws IOException {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        // Add yearly revenue data to the dataset
+        for (Map.Entry<Integer, Double> entry : yearlyRevenue.entrySet()) {
+            dataset.addValue(entry.getValue(), "Revenue", entry.getKey().toString());
+        }
+
+        // Create the chart
+        JFreeChart chart = ChartFactory.createLineChart(
+                "Yearly Revenue Trend (Last 5 Years)", "Year", "Revenue", dataset, PlotOrientation.VERTICAL, true, true, false);
+
+        // Convert chart to image (PNG)
+        BufferedImage chartImage = chart.createBufferedImage(800, 600);
+
+        // Save the chart image to a file (e.g., on your local PC)
+        File outputFile = new File("yearly_revenue_trend_last_5_years.png"); // Change path as needed
+        ImageIO.write(chartImage, "PNG", outputFile);
+    }
 }
