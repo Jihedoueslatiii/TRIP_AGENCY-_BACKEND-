@@ -123,7 +123,7 @@ public class OffreVoyageController {
 
             if (resource.exists() && resource.isReadable()) {
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Change if using PNG or others
+                        .contentType(MediaType.IMAGE_JPEG) 
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
             } else {
