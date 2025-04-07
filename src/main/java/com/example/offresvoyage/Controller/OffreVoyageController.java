@@ -123,7 +123,7 @@ public class OffreVoyageController {
 
             if (resource.exists() && resource.isReadable()) {
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) 
+                        .contentType(MediaType.IMAGE_JPEG)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
             } else {
@@ -142,16 +142,50 @@ public class OffreVoyageController {
     @PutMapping("/modify-offre-voyage/{offre-id}")
     public ResponseEntity<OffreVoyage> modifyOffreVoyage(
             @PathVariable("offre-id") Long idOffreVoyage,
-            @RequestBody OffreVoyage offreVoyage
-    ) {
+            @RequestParam(value = "nom", required = false) String nom,
+            @RequestParam(value = "destination", required = false) String destination,
+            @RequestParam(value = "dateDepart", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDepart,
+            @RequestParam(value = "dateFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin,
+            @RequestParam(value = "prix", required = false) Double prix,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "transport", required = false) Transport transport,
+            @RequestParam(value = "hebergement", required = false) Hebergement hebergement,
+            @RequestParam(value = "capacite", required = false) Integer capacite,
+            @RequestParam(value = "dateLimiteReservation", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateLimiteReservation,
+            @RequestParam(value = "statut", required = false) Statut statut,
+            @RequestParam(value = "images", required = false) MultipartFile[] images
+    ) throws IOException {
+
         try {
-            offreVoyage.setIdOffreVoyage(idOffreVoyage);
-            OffreVoyage updatedOffreVoyage = serviceOffreVoyage.updateOffreVoyage(offreVoyage);
-            if (updatedOffreVoyage != null) {
-                return ResponseEntity.ok(updatedOffreVoyage);
-            } else {
+            OffreVoyage existingOffreVoyage = serviceOffreVoyage.getOffreVoyage(idOffreVoyage);
+            if (existingOffreVoyage == null){
                 return ResponseEntity.notFound().build();
             }
+
+            // Update fields if provided
+            if (nom != null) existingOffreVoyage.setNom(nom);
+            if (destination != null) existingOffreVoyage.setDestination(destination);
+            if (dateDepart != null) existingOffreVoyage.setDateDepart(dateDepart);
+            if (dateFin != null) existingOffreVoyage.setDateFin(dateFin);
+            if (prix != null) existingOffreVoyage.setPrix(prix);
+            if (description != null) existingOffreVoyage.setDescription(description);
+            if (transport != null) existingOffreVoyage.setTransport(transport);
+            if (hebergement != null) existingOffreVoyage.setHebergement(hebergement);
+            if (capacite != null) existingOffreVoyage.setCapacite(capacite);
+            if (dateLimiteReservation != null) existingOffreVoyage.setDateLimiteReservation(dateLimiteReservation);
+            if (statut != null) existingOffreVoyage.setStatut(statut);
+
+            if (images != null) {
+                List<String> imageUrls = new ArrayList<>();
+                for (MultipartFile image : images) {
+                    imageUrls.add(saveImageAndGetUrl(image));
+                }
+                existingOffreVoyage.setImageUrls(imageUrls);
+            }
+
+            OffreVoyage updatedOffreVoyage = serviceOffreVoyage.updateOffreVoyage(existingOffreVoyage);
+            return ResponseEntity.ok(updatedOffreVoyage);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
