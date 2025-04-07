@@ -344,7 +344,7 @@ public class UserController {
 
         mailSender.send(message);
     }
-}   
+}
 
 // DTOs for request bodies
 class ForgotPasswordRequest {
