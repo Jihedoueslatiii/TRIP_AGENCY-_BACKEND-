@@ -26,10 +26,10 @@ Ce microservice a pour objectif de gérer les offres de voyages (programmes) pou
 
 ## Comment Utiliser
 
-1.  **Cloner le dépôt :**
+1. **Cloner le dépôt :**
 
     ```bash
-   git clone --branch offre-voyage https://github.com/Jihedoueslatiii/TRIP_AGENCY-_BACKEND-.git
+    git clone --branch offre-voyage [https://github.com/Jihedoueslatiii/TRIP_AGENCY-_BACKEND-.git](https://github.com/Jihedoueslatiii/TRIP_AGENCY-_BACKEND-.git)
     ```
 
 2.  **Configurer la base de données :**
