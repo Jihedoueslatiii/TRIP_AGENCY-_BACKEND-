@@ -34,6 +34,7 @@ public class SecurityConfig {
         this.jwtAuthenticationProvider = jwtAuthenticationProvider;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
@@ -107,11 +108,12 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
-        return new OidcUserService();
+        return new OidcUserService();  // Service for OpenID Connect (OIDC) users
     }
 
+    // OAuth2 UserService for OAuth2 users (general)
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
-        return new DefaultOAuth2UserService();
+        return new DefaultOAuth2UserService();  // Service for general OAuth2 users
     }
 }

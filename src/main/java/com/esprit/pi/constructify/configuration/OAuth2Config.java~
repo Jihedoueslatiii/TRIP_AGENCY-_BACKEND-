@@ -1,0 +1,28 @@
+package com.esprit.pi.constructify.configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+
+@Configuration
+public class OAuth2Config {
+
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(googleClientRegistration());
+    }
+
+    private ClientRegistration googleClientRegistration() {
+        return ClientRegistration.withRegistrationId("google")
+                .clientId("637443729013-duhmm68am6rcig4fck4jj48i85tg92nq.apps.googleusercontent.com")
+                .clientSecret("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")
+                .scope("profile", "email")
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                .tokenUri("https://oauth2.googleapis.com/token")
+                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .userNameAttributeName("id")
+                .redirectUri("{baseUrl}/login/oauth2/code/google")
+                .build();
+    }
+}
