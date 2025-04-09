@@ -6,7 +6,7 @@ const reservationSchema = new mongoose.Schema({
   itemType: { type: String, required: true },
   travelers: { type: Number, required: true },
   options: { type: [String], required: true },
-  totalPrice: { type: Number, required: true },
+  totalPrice: { type: Number, required: true, min: 0 },
   personalInfo: {
     name: { type: String, required: true },
     email: { type: String, required: true },
